@@ -2,15 +2,25 @@ import { Suspense, useState } from "react";
 import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import SubscriberDashboard from "./components/SubscriberDashboard";
+import TechSupportAdminDashboard from "./components/TechSupportAdminDashboard";
+import TechSupportAgentDashboard from "./components/TechSupportAgentDashboard";
 import routes from "tempo-routes";
 
 function App() {
   // In a real app, this would come from an auth context or API
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // For demo purposes - toggle between visitor and subscriber
+  // For demo purposes - toggle between different roles
   const toggleUserRole = () => {
-    setUserRole(userRole === "subscriber" ? null : "subscriber");
+    if (userRole === null) {
+      setUserRole("subscriber");
+    } else if (userRole === "subscriber") {
+      setUserRole("tech_support_admin");
+    } else if (userRole === "tech_support_admin") {
+      setUserRole("tech_support_agent");
+    } else {
+      setUserRole(null);
+    }
   };
 
   return (
@@ -22,9 +32,13 @@ function App() {
             onClick={toggleUserRole}
             className="px-4 py-2 bg-slate-800 text-white rounded-md text-sm"
           >
-            {userRole === "subscriber"
-              ? "Switch to Visitor View"
-              : "Switch to Subscriber View"}
+            {userRole === null
+              ? "Switch to Subscriber View"
+              : userRole === "subscriber"
+                ? "Switch to Tech Support Admin View"
+                : userRole === "tech_support_admin"
+                  ? "Switch to Tech Support Agent View"
+                  : "Switch to Visitor View"}
           </button>
         </div>
 
@@ -34,6 +48,10 @@ function App() {
             element={
               userRole === "subscriber" ? (
                 <Navigate to="/dashboard" />
+              ) : userRole === "tech_support_admin" ? (
+                <Navigate to="/admin" />
+              ) : userRole === "tech_support_agent" ? (
+                <Navigate to="/agent" />
               ) : (
                 <Home />
               )
@@ -44,6 +62,26 @@ function App() {
             element={
               userRole === "subscriber" ? (
                 <SubscriberDashboard />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              userRole === "tech_support_admin" ? (
+                <TechSupportAdminDashboard />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/agent"
+            element={
+              userRole === "tech_support_agent" ? (
+                <TechSupportAgentDashboard />
               ) : (
                 <Navigate to="/" />
               )
